@@ -13,6 +13,8 @@ OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 void setup() {
   leds.begin();
   leds.show();
+
+  randomSeed(analogRead(0));
 }
 
 #define BLACK  0x000000
@@ -96,19 +98,18 @@ int walkData[24][12] = {
   {15, 16, 19, 20, 22, -1, -1, -1, -1, -1, -1, -1}
 };
 
-int currSlice = 0;
+int prevIndex = 0;
+int currIndex = 0;
 
 void loop() {
-  colorWipe(BLACK);
-  colorWipeSlice(walkData[currSlice], numSides, WHITE);
-  leds.setPixel(currSlice, RED);
+  colorWipe(RED);
+  leds.setPixel(prevIndex, BLUE);
+  leds.setPixel(currIndex, WHITE);
   leds.show();
-  delayMicroseconds(2000000);
+  delayMicroseconds(100000);
 
-  currSlice++;
-  if (currSlice >= numRhombododdies) {
-    currSlice = 0;
-  }
+  prevIndex = currIndex;
+  currIndex = nextIndex(currIndex);
 }
 
 void colorWipe(int color) {
@@ -123,5 +124,14 @@ void colorWipeSlice(int slice[], int sliceLen, int color) {
     if (index < 0) break;
     leds.setPixel(index, color);
   }
+}
+
+int nextIndex(int index) {
+  int numCandidates = 0;
+  for (int i = 0; i < numSides; i++) {
+    if (walkData[index][i] < 0) break;
+    numCandidates++;
+  }
+  return walkData[index][random(numCandidates)];
 }
 
