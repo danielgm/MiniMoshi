@@ -26,21 +26,31 @@ void setup() {
 #define ORANGE 0xE05800
 #define WHITE  0xFFFFFF
 
+#define RANDOM_WALK_MODE 0
+#define H_SLICE_MODE 1
+#define V_SLICE_MODE 2
+#define D0_SLICE_MODE 3
+#define D1_SLICE_MODE 4
+#define D2_SLICE_MODE 5
+#define D3_SLICE_MODE 6
+
+int drawMode = D3_SLICE_MODE;
+
 int sliceLen = 9;
 
 int numHSlices = 4;
 int hSlices[4][9] {
-  {0, 7, 8, 11, 12, 18, 19, -1, -1},
-  {2, 5, 6, 14, 15, 16, 17, 20, 21},
-  {1, 9, 10, 13, 22, 23, -1, -1, -1},
-  {3, 4, -1, -1, -1, -1, -1, -1, -1},
+  { 0,  7,  8, 11, 12, 18, 19, -1, -1},
+  { 2,  5,  6, 14, 15, 16, 17, 20, 21},
+  { 1,  9, 10, 13, 22, 23, -1, -1, -1},
+  { 3,  4, -1, -1, -1, -1, -1, -1, -1},
 };
 
 int numVSlices = 6;
 int vSlices[6][9] {
-  {0, 1, -1, -1, -1, -1, -1, -1, -1},
-  {2, 3, 4, 5, 6, -1, -1, -1, -1},
-  {7, 8, 9, 10, 11, 12, 13, -1, -1},
+  { 0,  1, -1, -1, -1, -1, -1, -1, -1},
+  { 2,  3,  4,  5,  6, -1, -1, -1, -1},
+  { 7,  8,  9, 10, 11, 12, 13, -1, -1},
   {14, 15, 16, 17, -1, -1, -1, -1, -1},
   {18, 19, 22, 23, -1, -1, -1, -1, -1},
   {20, 21, -1, -1, -1, -1, -1, -1, -1}
@@ -48,25 +58,49 @@ int vSlices[6][9] {
 
 int numD0Slices = 6;
 int d0Slices[6][9] = {
-  {6, 7, -1, -1, -1, -1, -1, -1, -1},
-  {0, 5, 8, -1, -1, -1, -1, -1, -1},
-  {1, 2, 4, 9, 11, 17, -1, -1, -1},
-  {3, 10, 12, 16, 18, -1, -1, -1, -1},
+  { 6,  7, -1, -1, -1, -1, -1, -1, -1},
+  { 0,  5,  8, -1, -1, -1, -1, -1, -1},
+  { 1,  2,  4,  9, 11, 17, -1, -1, -1},
+  { 3, 10, 12, 16, 18, -1, -1, -1, -1},
   {13, 15, 19, 21, 22, -1, -1, -1, -1},
   {14, 20, 23, -1, -1, -1, -1, -1, -1}
 };
 
 int numD1Slices = 9;
 int d1Slices[9][9] = {
-  {1, -1, -1, -1, -1, -1, -1, -1, -1},
-  {0, 3, -1, -1, -1, -1, -1, -1, -1},
-  {2, 4, 13, -1, -1, -1, -1, -1, -1},
-  {5, 10, 12, 14, -1, -1, -1, -1, -1},
-  {6, 9, 11, 15, -1, -1, -1, -1, -1},
-  {8, 16, 23, -1, -1, -1, -1, -1, -1},
-  {7, 17, 19, 22,  -1, -1, -1, -1, -1},
+  { 1, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 0,  3, -1, -1, -1, -1, -1, -1, -1},
+  { 2,  4, 13, -1, -1, -1, -1, -1, -1},
+  { 5, 10, 12, 14, -1, -1, -1, -1, -1},
+  { 6,  9, 11, 15, -1, -1, -1, -1, -1},
+  { 8, 16, 23, -1, -1, -1, -1, -1, -1},
+  { 7, 17, 19, 22, -1, -1, -1, -1, -1},
   {18, 20, -1, -1, -1, -1, -1, -1, -1},
   {21, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
+int numD2Slices = 10;
+int d2Slices[10][9] = {
+  { 0, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 1, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 2, 12, -1, -1, -1, -1, -1, -1, -1},
+  { 3,  5, 11, 13, 14, -1, -1, -1, -1},
+  { 4,  6,  8, 10, 15, -1, -1, -1, -1},
+  { 7,  9, 16, 19, -1, -1, -1, -1, -1},
+  {17, 18, 23, -1, -1, -1, -1, -1, -1},
+  {22, -1, -1, -1, -1, -1, -1, -1, -1},
+  {20, -1, -1, -1, -1, -1, -1, -1, -1},
+  {21, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
+int numD3Slices = 6;
+int d3Slices[6][9] = {
+  { 4,  6, -1, -1, -1, -1, -1, -1, -1},
+  { 1,  3,  5,  7,  9, -1, -1, -1, -1},
+  { 0,  2,  8, 10, 17, -1, -1, -1, -1},
+  {11, 13, 16, 22, -1, -1, -1, -1, -1},
+  {12, 15, 18, 21, 23, -1, -1, -1, -1},
+  {14, 19, 20, -1, -1, -1, -1, -1, -1}
 };
 
 int numRhombododdies = 24;
@@ -102,6 +136,32 @@ int prevIndex = 0;
 int currIndex = 0;
 
 void loop() {
+  switch (drawMode) {
+    case RANDOM_WALK_MODE:
+      loopWalk();
+      break;
+    case H_SLICE_MODE:
+      loopSlice(hSlices, numHSlices);
+      break;
+    case V_SLICE_MODE:
+      loopSlice(vSlices, numVSlices);
+      break;
+    case D0_SLICE_MODE:
+      loopSlice(d0Slices, numD0Slices);
+      break;
+    case D1_SLICE_MODE:
+      loopSlice(d1Slices, numD1Slices);
+      break;
+    case D2_SLICE_MODE:
+      loopSlice(d2Slices, numD2Slices);
+      break;
+    case D3_SLICE_MODE:
+      loopSlice(d3Slices, numD3Slices);
+      break;
+  }
+}
+
+void loopWalk() {
   colorWipe(RED);
   leds.setPixel(prevIndex, BLUE);
   leds.setPixel(currIndex, WHITE);
@@ -112,13 +172,26 @@ void loop() {
   currIndex = nextIndex(currIndex);
 }
 
+void loopSlice(int slice[][9], int numSlices) {
+  colorWipe(RED);
+  colorWipeSlice(slice[currIndex], BLUE);
+  leds.show();
+  delayMicroseconds(100000);
+
+  prevIndex = currIndex;
+  currIndex++;
+  if (currIndex >= numSlices) {
+    currIndex = 0;
+  }
+}
+
 void colorWipe(int color) {
   for (int i = 0; i < leds.numPixels(); i++) {
     leds.setPixel(i, color);
   }
 }
 
-void colorWipeSlice(int slice[], int sliceLen, int color) {
+void colorWipeSlice(int slice[], int color) {
   for (int i = 0; i < sliceLen; i++) {
     int index = slice[i];
     if (index < 0) break;
