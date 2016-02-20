@@ -15,6 +15,7 @@ void setup() {
   leds.show();
 }
 
+#define BLACK  0x000000
 #define RED    0xFF0000
 #define GREEN  0x00FF00
 #define BLUE   0x0000FF
@@ -53,17 +54,30 @@ int d0Slices[6][9] = {
   {14, 20, 23, -1, -1, -1, -1, -1, -1}
 };
 
+int numD1Slices = 9;
+int d1Slices[9][9] = {
+  {1, -1, -1, -1, -1, -1, -1, -1, -1},
+  {0, 3, -1, -1, -1, -1, -1, -1, -1},
+  {2, 4, 13, -1, -1, -1, -1, -1, -1},
+  {5, 10, 12, 14, -1, -1, -1, -1, -1},
+  {6, 9, 11, 15, -1, -1, -1, -1, -1},
+  {8, 16, 23, -1, -1, -1, -1, -1, -1},
+  {7, 17, 19, 22,  -1, -1, -1, -1, -1},
+  {18, 20, -1, -1, -1, -1, -1, -1, -1},
+  {21, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
 int currLED = 0;
 int currSlice = 0;
 
 void loop() {
-  colorWipe(WHITE);
-  colorWipeSlice(d0Slices[currSlice], RED);
+  colorWipe(BLACK);
+  colorWipeSlice(d1Slices[currSlice], WHITE);
   leds.show();
-  delayMicroseconds(500000);
+  delayMicroseconds(1000000);
 
   currSlice++;
-  if (currSlice >= numD0Slices) {
+  if (currSlice >= numD1Slices) {
     currSlice = 0;
   }
 }
