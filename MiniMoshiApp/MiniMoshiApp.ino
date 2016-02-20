@@ -36,8 +36,9 @@ void setup() {
 #define RANDOM_MODE 7
 #define VARI_SLICE_MODE 8
 #define INFECT_MODE 9
+#define FADE_MODE 10
 
-int drawMode = INFECT_MODE;
+int drawMode = FADE_MODE;
 
 int sliceLen = 9;
 
@@ -165,6 +166,9 @@ int prevInfections[9] = {15, -1, -1, -1, -1, -1, -1, -1, -1};
 int numInfections = 1;
 int infections[9] = {15, -1, -1, -1, -1, -1, -1, -1, -1};
 
+int fadeSteps = 16;
+int fadeDir = 1;
+
 void loop() {
   switch (drawMode) {
     case RANDOM_WALK_MODE:
@@ -197,6 +201,9 @@ void loop() {
     case INFECT_MODE:
       loopInfect();
       break;
+    case FADE_MODE:
+      loopFade();
+      break;
   }
 }
 
@@ -216,7 +223,7 @@ void loopSlice(int slice[10][9], int numSlices) {
   colorWipe(RED);
   colorWipeSlice(slice[currIndex], BLUE);
   leds.show();
-  delayMicroseconds(100000);
+  delayMicroseconds(1000000);
 
   prevIndex = currIndex;
   currIndex++;
@@ -290,6 +297,26 @@ void loopInfect() {
   stepInfections();
 }
 
+void loopFade() {
+  int c = lerpColor(RED, BLUE, (float)currIndex / fadeSteps);
+  colorWipe(c);
+  leds.show();
+  delayMicroseconds(100000);
+
+  if (fadeDir > 0) {
+    currIndex++;
+    if (currIndex >= fadeSteps) {
+      fadeDir = -1;
+    }
+  }
+  else {
+    currIndex--;
+    if (currIndex <= 0) {
+      fadeDir = 1;
+    }
+  }
+}
+
 void colorAltSlice(int slice[10][9], int numSlices, int color) {
   for (int i = 0; i < numSlices; i += 2) {
     colorWipeSlice(slice[i], color);
@@ -345,6 +372,22 @@ void stepInfections() {
       infections[i] = nextIndex(infections[i]);
     }
   }
+}
 
+int redMask = 0xFF0000, greenMask = 0xFF00, blueMask = 0xFF;
+int lerpColor(int a, int b, float v) {
+  int ar = (a & redMask) >> 16;
+  int ag = (a & greenMask) >> 8;
+  int ab = (a & blueMask);
+  int br = (b & redMask) >> 16;
+  int bg = (b & greenMask) >> 8;
+  int bb = (b & blueMask);
+
+  ar += (br - ar) * v;
+  ag += (bg - ag) * v;
+  ab += (bb - ab) * v;
+
+  int rgb = (ar << 16) + (ag << 8) + ab;
+  return rgb;
 }
 
