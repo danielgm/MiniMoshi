@@ -67,17 +67,46 @@ int d1Slices[9][9] = {
   {21, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-int currLED = 0;
+int numRhombododdies = 24;
+int numSides = 12;
+int walkData[24][12] = {
+  { 1,  2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 0,  2,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 0,  1,  3,  5, 10, 11, 12, 13, -1, -1, -1, -1},
+  { 1,  2,  4, 10, 13, -1, -1, -1, -1, -1, -1, -1},
+  { 3,  5,  9, 10, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 2,  4,  6,  8,  9, 10, 11, -1, -1, -1, -1, -1},
+  { 5,  7,  8,  9, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 6, 17,  8, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+  { 5,  6,  7,  9, 11, 17, 16, -1, -1, -1, -1, -1},
+  { 4,  5,  6,  8, 10, 16, 17, -1, -1, -1, -1, -1},
+  { 2,  3,  4,  5,  9, 11, 13, 15, 16, -1, -1, -1},
+  { 2,  5,  8, 10, 12, 15, 16, -1, -1, -1, -1, -1},
+  { 2, 11, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1},
+  { 2,  3, 12, 10, 14, 15, -1, -1, -1, -1, -1, -1},
+  {12, 13, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+  {10, 11, 12, 13, 14, 16, 19, 23, -1, -1, -1, -1},
+  { 8,  9, 10, 11, 15, 17, 18, 19, 20, 22, -1, -1},
+  { 7,  8,  9, 16, 18, 22, -1, -1, -1, -1, -1, -1},
+  {16, 17, 19, 20, 21, 22, -1, -1, -1, -1, -1, -1},
+  {15, 16, 18, 20, 23, -1, -1, -1, -1, -1, -1, -1},
+  {18, 19, 21, 22, 23, -1, -1, -1, -1, -1, -1, -1},
+  {18, 20, 22, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+  {16, 17, 18, 20, 21, 23, -1, -1, -1, -1, -1, -1},
+  {15, 16, 19, 20, 22, -1, -1, -1, -1, -1, -1, -1}
+};
+
 int currSlice = 0;
 
 void loop() {
   colorWipe(BLACK);
-  colorWipeSlice(d1Slices[currSlice], WHITE);
+  colorWipeSlice(walkData[currSlice], numSides, WHITE);
+  leds.setPixel(currSlice, RED);
   leds.show();
-  delayMicroseconds(1000000);
+  delayMicroseconds(2000000);
 
   currSlice++;
-  if (currSlice >= numD1Slices) {
+  if (currSlice >= numRhombododdies) {
     currSlice = 0;
   }
 }
@@ -88,12 +117,11 @@ void colorWipe(int color) {
   }
 }
 
-void colorWipeSlice(int slice[], int color) {
+void colorWipeSlice(int slice[], int sliceLen, int color) {
   for (int i = 0; i < sliceLen; i++) {
     int index = slice[i];
-    if (index >= 0) {
-      leds.setPixel(index, color);
-    }
+    if (index < 0) break;
+    leds.setPixel(index, color);
   }
 }
 
