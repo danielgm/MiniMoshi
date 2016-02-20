@@ -11,17 +11,20 @@ const int config = WS2811_RGB | WS2811_800kHz;
 OctoWS2811 leds(ledsPerStrip, displayMemory, drawingMemory, config);
 
 void setup() {
+  pinMode(0, INPUT_PULLUP);
+
   leds.begin();
   leds.show();
 
-  randomSeed(analogRead(0));
+  randomSeed(analogRead(1));
 }
 
 #define BLACK  0x000000
 #define RED    0xFF0000
 #define GREEN  0x00FF00
+#define BABYBLUE   0x6666FF
 #define BLUE   0x0000FF
-#define YELLOW 0xFFFF00
+#define YELLOW 0xFF9900
 #define PINK   0xFF1088
 #define ORANGE 0xE05800
 #define WHITE  0xFFFFFF
@@ -38,7 +41,7 @@ void setup() {
 #define INFECT_MODE 9
 #define FADE_MODE 10
 
-int drawMode = FADE_MODE;
+int drawMode = RANDOM_WALK_MODE;
 
 int sliceLen = 9;
 
@@ -170,6 +173,13 @@ int fadeSteps = 16;
 int fadeDir = 1;
 
 void loop() {
+  if (isActive()) {
+    drawMode = RANDOM_MODE;
+  }
+  else {
+    drawMode = INFECT_MODE;
+  }
+
   switch (drawMode) {
     case RANDOM_WALK_MODE:
       loopWalk();
@@ -283,12 +293,12 @@ void loopVariSlice() {
 }
 
 void loopInfect() {
-  colorWipe(RED);
+  colorWipe(PINK);
   for (int i = 0; i < prevNumInfections; i++) {
-    leds.setPixel(prevInfections[i], BLUE);
+    leds.setPixel(prevInfections[i], BABYBLUE);
   }
   for (int i = 0; i < numInfections; i++) {
-    leds.setPixel(infections[i], WHITE);
+    leds.setPixel(infections[i], YELLOW);
   }
 
   leds.show();
@@ -391,3 +401,6 @@ int lerpColor(int a, int b, float v) {
   return rgb;
 }
 
+bool isActive() {
+  return digitalRead(0) == HIGH;
+}
