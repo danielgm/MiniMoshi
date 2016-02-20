@@ -35,8 +35,9 @@ void setup() {
 #define D3_SLICE_MODE 6
 #define RANDOM_MODE 7
 #define VARI_SLICE_MODE 8
+#define INFECT_MODE 9
 
-int drawMode = VARI_SLICE_MODE;
+int drawMode = INFECT_MODE;
 
 int sliceLen = 9;
 
@@ -156,6 +157,14 @@ int walkData[24][12] = {
 int prevIndex = 0;
 int currIndex = 0;
 
+int maxInfections = 9;
+
+int prevNumInfections = 1;
+int prevInfections[9] = {15, -1, -1, -1, -1, -1, -1, -1, -1};
+
+int numInfections = 1;
+int infections[9] = {15, -1, -1, -1, -1, -1, -1, -1, -1};
+
 void loop() {
   switch (drawMode) {
     case RANDOM_WALK_MODE:
@@ -185,6 +194,9 @@ void loop() {
     case VARI_SLICE_MODE:
       loopVariSlice();
       break;
+    case INFECT_MODE:
+      loopInfect();
+      break;
   }
 }
 
@@ -195,8 +207,9 @@ void loopWalk() {
   leds.show();
   delayMicroseconds(100000);
 
+  int noVisitIndex = prevIndex;
   prevIndex = currIndex;
-  currIndex = nextIndex(currIndex);
+  currIndex = nextIndex(currIndex, noVisitIndex);
 }
 
 void loopSlice(int slice[10][9], int numSlices) {
@@ -230,9 +243,6 @@ void loopRandom() {
 }
 
 void loopVariSlice() {
-  int numSlices;
-  int slices[10][9];
-
   colorWipe(RED);
   switch (currIndex) {
     case 0:
@@ -265,6 +275,21 @@ void loopVariSlice() {
   }
 }
 
+void loopInfect() {
+  colorWipe(RED);
+  for (int i = 0; i < prevNumInfections; i++) {
+    leds.setPixel(prevInfections[i], BLUE);
+  }
+  for (int i = 0; i < numInfections; i++) {
+    leds.setPixel(infections[i], WHITE);
+  }
+
+  leds.show();
+  delayMicroseconds(100000);
+
+  stepInfections();
+}
+
 void colorAltSlice(int slice[10][9], int numSlices, int color) {
   for (int i = 0; i < numSlices; i += 2) {
     colorWipeSlice(slice[i], color);
@@ -286,11 +311,40 @@ void colorWipeSlice(int slice[10], int color) {
 }
 
 int nextIndex(int index) {
+  return nextIndex(index, -1);
+}
+
+int nextIndex(int index, int noVisitIndex) {
   int numCandidates = 0;
   for (int i = 0; i < numSides; i++) {
     if (walkData[index][i] < 0) break;
     numCandidates++;
   }
-  return walkData[index][random(numCandidates)];
+  int nextIndex;
+  while ((nextIndex = walkData[index][random(numCandidates)]) == noVisitIndex) {};
+  return nextIndex;
+}
+
+void stepInfections() {
+  prevNumInfections = numInfections;
+  for (int i = 0; i < prevNumInfections; i++) {
+    prevInfections[i] = infections[i];
+
+    if (numInfections > 1 && random(8) < 1) {
+      // Current infection dies.
+      infections[i] = infections[numInfections - 1];
+      numInfections--;
+      prevNumInfections--;
+    }
+    else {
+      if (numInfections < maxInfections && random(6) < 1) {
+        // New infection.
+        infections[numInfections] = nextIndex(infections[i], prevInfections[i]);
+        numInfections++;
+      }
+      infections[i] = nextIndex(infections[i]);
+    }
+  }
+
 }
 
