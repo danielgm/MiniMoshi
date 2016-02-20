@@ -43,23 +43,27 @@ int vSlices[6][9] {
   {20, 21, -1, -1, -1, -1, -1, -1, -1}
 };
 
+int numD0Slices = 6;
+int d0Slices[6][9] = {
+  {6, 7, -1, -1, -1, -1, -1, -1, -1},
+  {0, 5, 8, -1, -1, -1, -1, -1, -1},
+  {1, 2, 4, 9, 11, 17, -1, -1, -1},
+  {3, 10, 12, 16, 18, -1, -1, -1, -1},
+  {13, 15, 19, 21, 22, -1, -1, -1, -1},
+  {14, 20, 23, -1, -1, -1, -1, -1, -1}
+};
 
 int currLED = 0;
 int currSlice = 0;
 
 void loop() {
   colorWipe(WHITE);
-  for (int i = 0; i < sliceLen; i++) {
-    int index = vSlices[currSlice][i];
-    if (index >= 0) {
-      leds.setPixel(index, RED);
-    }
-  }
+  colorWipeSlice(d0Slices[currSlice], RED);
   leds.show();
-  delayMicroseconds(2000000);
+  delayMicroseconds(500000);
 
   currSlice++;
-  if (currSlice >= numVSlices) {
+  if (currSlice >= numD0Slices) {
     currSlice = 0;
   }
 }
@@ -69,3 +73,13 @@ void colorWipe(int color) {
     leds.setPixel(i, color);
   }
 }
+
+void colorWipeSlice(int slice[], int color) {
+  for (int i = 0; i < sliceLen; i++) {
+    int index = slice[i];
+    if (index >= 0) {
+      leds.setPixel(index, color);
+    }
+  }
+}
+
